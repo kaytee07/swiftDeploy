@@ -4,15 +4,12 @@ serialize instance to a json file and deserializes json file to
 instances
 """
 import json
-#from models.amenity import Amenity
+#from models.docker import images
 from models.base_model import BaseModel
-#from models.city import City
-#from models.place import Place
-#from models.review import Review
-#from models.state import State
-#from models.user import User
+from models.container import Container
+from models.user import User
 
-classes = {"BaseModel": BaseModel}
+classes = {"BaseModel": BaseModel, "User": User, "Container": Container}
 
 
 class FileStorage():
@@ -23,9 +20,18 @@ class FileStorage():
     __file_path = 'file.json'
     __objects = {}
 
-    def all(self):
+    def all(self, cls=None):
         """return the dictionary of __objects"""
-        return self.__objects
+        new_object = {}
+        if cls:
+            for key, value in self.__objects.items():
+                print(value.to_dict())
+                cls_name = str(cls).split(".")[2].split("'")[0]
+                if value.to_dict()['__class__'] == cls_name:
+                    new_object[key] = value
+            return new_object
+        else:
+            return self.__objects
 
     def new(self, obj):
         """ set key, value in __objects"""
@@ -51,3 +57,8 @@ class FileStorage():
             json_data = json.load(files)
             for key in json_data:
                 self.__objects[key] = classes[key.split('.')[0]](**json_data[key])
+
+    def delete(self, obj=None):
+        if obj:
+            key = f"{obj.to_dict()['__class__']}.{obj.to_dict()['id']}"
+            del self.__objects[key]

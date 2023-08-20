@@ -5,17 +5,25 @@ this class object defines common attributes and models like the id
 models we create
 """
 import uuid
+import sys
 from datetime import datetime
 import models
+from sqlalchemy import Column, Integer, String, create_engine, Datetime
+from sqlalchemy.ext.declarative import declarative_base
 
 
 time = "%Y-%m-%dT%H:%M:%S.%f"
+Base = declarative_base()
 
 
 class BaseModel():
     """
     this class object defines common attributes and models
     """
+    id = Column(String(60), primary_key=True)
+    created_at = Column(Datetime, default=datetime.utcnow)
+    updated_at = Column(Datetime, default=datetime.utcnow)
+
     def __init__(self, *args, **kwargs):
         """initialize class attributes"""
         if kwargs:
@@ -29,7 +37,6 @@ class BaseModel():
         else:
             self.id = str(uuid.uuid4())
             self.created_at = datetime.now()
-            models.storage.new(self)
 
     def __str__(self):
         """Represent class in a string form"""
@@ -38,7 +45,12 @@ class BaseModel():
     def save(self):
         """update the updated_at atribute"""
         self.updated_at = datetime.now()
+        models.storage.new(self)
         models.storage.save()
+
+    def delete(self):
+        """delete current instance from storage"""
+        models.storage.delete(self)
 
     def to_dict(self):
         """

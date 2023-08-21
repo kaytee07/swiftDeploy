@@ -1,26 +1,36 @@
 #!/usr/bin/python3
 """
-model for container object
+docker container class with it attribute
 """
-from models.base_model import BaseModel, Base
-from sqlalchemy import Column, String, Datetime, ForeignKey
-from sqlalchemy.orm import relationship
+from models.base_model import BaseModel
 from datetime import datetime
 
 
-class Container(BaseModel, Base):
+class Container(BaseModel):
     """
-    models important details about our docker container
+    Container objects having all the necessart methods and
+    attributes
     """
-    __tablename__ = "container"
-
-    status = Column(String(60), default="Stopped")
-    container_id = Column(String(60), nullable=False)
-    user_id = Column(String(60), ForeignKey('users.id'), nullable=False)
-    start_time = Column(Datetime, default=datetime.utcnow)
-    stop_time = Column(Datetime)
-
-    user = relationship('User', back_populates='container')
+    status = None
+    container_id = None
+    start_time = None
+    stop_time = None
+    user_id = None
 
     def __init__(self, *args, **kwargs):
+        """
+        initializa attributes and inherit BaseModel attributes
+        """
         super().__init__(*args, **kwargs)
+
+    def start(self):
+        """
+        start docker container
+        """
+        self.start_time = datetime.utcnow()
+
+    def stop(self):
+        """
+        stop docker container 
+        """
+        self.stop_time = datetime.utcnow()

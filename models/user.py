@@ -1,32 +1,22 @@
 #!/usr/bin/python3
 """
-User class that inherit from BaseModel
+creat user class that inherit from BaseModel
 """
-from os import getenv
-from models.base_model import BaseModel, Base
-from sqlalchemy.orm import relationship
-from sqlalchemy import Column, String
+from models.base_model import BaseModel
 
 
-class User(Base, BaseModel):
+class User(BaseModel):
     """
-    User models important details about our user object
+    user class that describes the user
     """
-    __tablename__ = "users"
-    SD_TYPE_STORAGE = getenv('SD_TYPE_STORAGE')
-
-    if SD_TYPE_STORAGE == 'db':
-        email = Column(String(128), nullable=False)
-        password = Column(String(128), nullable=False)
-        first_name = Column(String(128), nullable=False)
-        last_name = Column(String(128), nullable=False)
-    else:
-        email = ""
-        password = ""
-        first_name = ""
-        last_name = ""
-
-    container = relationship('Container', back_populates='user')
+    first_name = None
+    last_name = None
+    username = None
+    email = None
+    password = None
 
     def __init__(self, *args, **kwargs):
+        """
+        inherit BaseModel methods and attributes
+        """
         super().__init__(*args, **kwargs)

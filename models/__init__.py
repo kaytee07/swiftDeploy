@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 """
-create an instance for file storage class
+create instance of file storage and deserialze json file
 """
-
 from models.engine.file_storage import FileStorage
 storage = FileStorage()
 storage.reload()

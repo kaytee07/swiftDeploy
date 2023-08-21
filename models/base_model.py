@@ -4,6 +4,7 @@ defines the common attribute for all other classes
 """
 import uuid
 from datetime import datetime
+import models
 
 time_fmt = "%Y-%m-%dT%H:%M:%S.%f"
 
@@ -12,21 +13,36 @@ class BaseModel:
     """
     attributes common to all other classes
     """
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         """
         initialize class attributes
         """
-        self.id = str(uuid.uuid4())
-        self.created_at = datetime.utcnow()
-        self.updated_at = datetime.utcnow()
+        if kwargs:
+            for key, value in kwargs.items():
+                if key == '__class__':
+                    pass
+                elif key == 'created_at' or key == 'updated_at' or key == 'start_time' or key == 'stop_time':
+                    date_obj = datetime.strptime(value, time_fmt)
+                    setattr(self, key, date_obj)
+                else:
+                    setattr(self, key, value)
+        else:
+            self.id = str(uuid.uuid4())
+            self.created_at = datetime.utcnow()
+            self.updated_at = datetime.utcnow()
+            models.storage.new(self)
 
     def __str__(self):
+        """this is going to be the string representation of the class"""
         return f"[{self.__class__.__name__}] ({self.id}) {self.__dict__}"
 
     def save(self):
+        """update public instance attribute"""
         self.updated_at = datetime.utcnow()
+        models.storage.save()
 
     def to_dict(self):
+        """dictionary representation of all attribute in class"""
         new_dict = {}
         new_dict['__class__'] = self.__class__.__name__
         for key, value in self.__dict__.items():

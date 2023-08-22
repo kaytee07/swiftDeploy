@@ -28,7 +28,7 @@ class DBStorage:
         SD_MYSQL_DB = getenv('SD_MYSQL_DB')
         SD_ENV = getenv('SD_ENV')
 
-        dburl = "mysql+mysqldb://{}.{}@{}/{}".format(SD_MYSQL_USER,
+        dburl = "mysql+mysqldb://{}:{}@{}/{}".format(SD_MYSQL_USER,
                                                      SD_MYSQL_PWD,
                                                      SD_MYSQL_HOST,
                                                      SD_MYSQL_DB)
@@ -43,24 +43,21 @@ class DBStorage:
         get all object based on their class name and if cls = None
         query all object types in Database
         """
-        new_obj = {}
+        new_dict = {}
         if cls:
             objects = self.__session.query(cls).all()
             for obj in objects:
                 key = f"{obj.__class__.__name__}.{obj.id}"
-                new_obj[key] = obj
-
+                new_dict[key] = obj
         else:
-            for value in classes.values():
-                objects = self.__session.query(value).all()
-                for obj in objects:
-                    key = f"{obj.__class__.__name__}.{obj.id}"
-                    new_obj[key] = obj
-        return new_obj
+            for class_name, class_obj in classes.items():
+                objects = self.__session.query(class_obj).all()
+                new_dict[class_name] = objects
+        return new_dict
 
     def new(self, obj=None):
         """
-        add object to the session 
+        add object to the session
         """
         self.__session.add(obj)
 

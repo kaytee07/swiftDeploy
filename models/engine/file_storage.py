@@ -1,41 +1,41 @@
- #!/usr/bin/python3
+#!/bin/usr/python3
 """
-serialize instance to a json file and deserializes json file to
-instances
+instance attributes will now be persistent
 """
 import json
-#from models.docker import images
 from models.base_model import BaseModel
-from models.container import Container
 from models.user import User
+from models.container import Container
 
-classes = {"BaseModel": BaseModel, "User": User, "Container": Container}
+classes = {'BaseModel': BaseModel, 'User': User, 'Container': Container}
 
 
-class FileStorage():
+class FileStorage:
     """
-    serialize instance to json file and deserialize json file
-    object instance
+    store class attributes in file
     """
-    __file_path = 'file.json'
+    __file_path = "file.json"
     __objects = {}
 
     def all(self, cls=None):
-        """return the dictionary of __objects"""
-        new_object = {}
+        """
+        returns the dictionary __objects
+        """
         if cls:
+            new_obj = {}
+            new_cls = str(cls).split('.')[2].split("'")[0]
             for key, value in self.__objects.items():
-                print(value.to_dict())
-                cls_name = str(cls).split(".")[2].split("'")[0]
-                if value.to_dict()['__class__'] == cls_name:
-                    new_object[key] = value
-            return new_object
+                if new_cls == value.to_dict()['__class__']:
+                    new_obj[key] = value
+            return new_obj
         else:
             return self.__objects
 
     def new(self, obj):
-        """ set key, value in __objects"""
-        key = f"{obj.__class__.__name__}.{obj.id}"
+        """
+        set in the the __objects with the class objects
+        """
+        key = f"{obj.to_dict()['__class__']}.{obj.to_dict()['id']}"
         self.__objects[key] = obj
 
     def save(self):
@@ -46,17 +46,22 @@ class FileStorage():
         data = {}
         for key, value in self.__objects.items():
             data[key] = value.to_dict()
-        with open(self.__file_path, 'w') as files:
-            json.dump(data, files)
+        with open(self.__file_path, 'w') as file:
+            json.dump(data, file)
 
     def reload(self):
         """
-        deserialize json file to object
+        deserialize json file to objects if only json file path
+        exist
         """
-        with open(self.__file_path, 'r') as files:
-            json_data = json.load(files)
-            for key in json_data:
-                self.__objects[key] = classes[key.split('.')[0]](**json_data[key])
+        try:
+            with open(self.__file_path, 'r') as file:
+                data = json.load(file)
+            for key, value in data.items():
+                obj = classes[value['__class__']](**data[key])
+                self.__objects[key] = obj
+        except json.JSONDecodeError:
+            pass
 
     def delete(self, obj=None):
         if obj:

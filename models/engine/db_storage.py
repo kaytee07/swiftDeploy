@@ -82,6 +82,23 @@ class DBStorage:
         Session = scoped_session(sessionmaker(bind=self.__engine, expire_on_commit=False))
         self.__session = Session()
 
+    def get(self, cls, id):
+        if cls:
+            obj = self.__session.query(cls).filter_by(id=id).first()
+            return obj
+        else:
+            None
+
+    def count(self, cls=None):
+        if cls:
+            count = self.__session.query(cls).count()
+            return count
+        else:
+            count = 0
+            for class_name, class_obj in classes.items():
+                count += self.__session.query(class_obj).count()
+            return count
+
     def close(self):
         """
         close session

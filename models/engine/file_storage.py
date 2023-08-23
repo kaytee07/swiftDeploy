@@ -67,3 +67,24 @@ class FileStorage:
         if obj:
             key = f"{obj.to_dict()['__class__']}.{obj.to_dict()['id']}"
             del self.__objects[key]
+
+    def get(self, cls, id):
+        """ Retrieve one object from storage """
+        if cls:
+            name = str(cls).split('.')[2].split("'")[0]
+            key = f"{name}.{id}"
+            return self.__objects[key]
+        else:
+            return None
+
+    def count(self, cls=None):
+        number = 0
+        if cls:
+            for key, value in self.__objects.items():
+                name = str(cls).split('.')[2].split("'")[0]
+                if value.to_dict()['__class__'] == name:
+                    number += 1
+        else:
+            for key, value in self.__objects.items():
+                number += 1
+        return number

@@ -22,6 +22,4 @@ def close_storage(error):
 if __name__ == "__main__":
     host = getenv('SD_API_HOST')
     port = getenv('SD_API_PORT')
-    print(port)
-    print(host)
     app.run(host=host, port=port, threaded=True)

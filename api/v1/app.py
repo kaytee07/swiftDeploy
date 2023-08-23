@@ -16,7 +16,14 @@ def close_storage(error):
     """
     close storage when app is torn down
     """
-    storage.close()
+    SD_ENV = getenv('SD_ENV')
+    if SD_ENV == 'db':
+        storage.close()
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return {"error": " Not found"}
 
 
 if __name__ == "__main__":

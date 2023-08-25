@@ -88,3 +88,24 @@ def update_user(user_id):
         return jsonify(user.to_dict()), 200
     else:
         abort(400, description="Not a JSON")
+
+
+@app_views.route("/users/login", strict_slashes=False, methods=['POST'])
+def login_user():
+    """
+    check passed password and username against password and
+    username stored in database
+    """
+    data = request.get_json()
+    user = storage.get(User, username=data['username'])
+    if user:
+        user_dict = user.to_dict()
+        if user_dict['password'] == data['password']:
+            return jsonify({
+                "password": user_dict['password'],
+                "login": "successfully"
+            }), 200
+        else:
+            abort(404, description="incorrect username or password")
+    else:
+        abort(404, description="User not found")

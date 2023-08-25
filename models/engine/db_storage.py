@@ -44,16 +44,13 @@ class DBStorage:
         query all object types in Database
         """
         new_dict = {}
-        if cls:
-            objects = self.__session.query(cls).all()
-            for obj in objects:
-                key = f"{obj.__class__.__name__}.{obj.id}"
-                new_dict[key] = obj
-        else:
-            for class_name, class_obj in classes.items():
-                objects = self.__session.query(class_obj).all()
-                new_dict[class_name] = objects
-        return new_dict
+        for clss in classes:
+            if cls is None or cls is classes[clss] or cls is clss:
+                objs = self.__session.query(classes[clss]).all()
+                for obj in objs:
+                    key = obj.__class__.__name__ + '.' + obj.id
+                    new_dict[key] = obj
+        return (new_dict)
 
     def new(self, obj=None):
         """
@@ -82,14 +79,24 @@ class DBStorage:
         Session = scoped_session(sessionmaker(bind=self.__engine, expire_on_commit=False))
         self.__session = Session()
 
-    def get(self, cls, id):
+    def get(self, cls, id=None, username=None):
+        """
+        get user based on user id passed or  username
+        """
         if cls:
-            obj = self.__session.query(cls).filter_by(id=id).first()
-            return obj
+            if id:
+                obj = self.__session.query(cls).filter_by(id=id).first()
+                return obj
+            elif username:
+                obj = self.__session.query(cls).filter_by(username=username).first()
+                return obj
         else:
             None
 
     def count(self, cls=None):
+        """
+        count entries in tables based on the class object passed
+        """
         if cls:
             count = self.__session.query(cls).count()
             return count

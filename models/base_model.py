@@ -33,6 +33,8 @@ class BaseModel:
                     setattr(self, key, date_obj)
                 else:
                     setattr(self, key, value)
+                if kwargs.get("id", None) is None:
+                    self.id = str(uuid.uuid4())
         else:
             self.id = str(uuid.uuid4())
             self.created_at = datetime.utcnow()
@@ -49,7 +51,7 @@ class BaseModel:
         models.storage.new(self)
         models.storage.save()
 
-    def to_dict(self):
+    def to_dict(self, db=None):
         """dictionary representation of all attribute in class"""
         new_dict = {}
         new_dict['__class__'] = self.__class__.__name__
@@ -58,9 +60,13 @@ class BaseModel:
                 new_dict[key] = value.strftime(time_fmt)
             elif key == '_sa_instance_state':
                 pass
+            elif db:
+                if key == 'password':
+                    pass
             else:
                 new_dict[key] = value
         return new_dict
 
     def delete(self):
+        """delete current class instance from storage"""
         models.storage.delete(self)

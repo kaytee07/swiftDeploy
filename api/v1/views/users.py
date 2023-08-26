@@ -12,15 +12,18 @@ import os
 
 
 def hash_password(password, salt=None):
-    if salt is None:
-        salt = os.urandom(16)
     rounds = 100000
     hash_algo = hashlib.sha256()
-    hk = hashlib.pbkdf2_hmac(hash_algo.name, password.encode('utf-8'), salt, rounds)
-    if salt:
-        return binascii.hexlify(hk).decode('utf-8')
+
+    if salt is None:
+        salt = os.urandom(16)
+        hk = hashlib.pbkdf2_hmac(hash_algo.name, password.encode('utf-8'), salt, rounds)
+        hashed_password = binascii.hexlify(hk).decode('utf-8')
+        return {"passwd": hashed_password, "salt": binascii.hexlify(salt).decode('utf-8')}
     else:
-        return {"passwd": binascii.hexlify(hk).decode('utf-8'), "salt": salt}
+        hk = hashlib.pbkdf2_hmac(hash_algo.name, password, salt, rounds)
+        hashed_password = binascii.hexlify(hk).decode('utf-8')
+        return hashed_password
 
 
 @app_views.route("/users", strict_slashes=False)
@@ -73,6 +76,7 @@ def create_user():
     if 'email' not in data:
         abort(400, description="Missing email")
 
+    print(hash_password(data['password']))
     data['password'] = hash_password(data['password'])['passwd']
     data['salt'] = hash_password(data['password'])['salt']
     new_user = User(**data)

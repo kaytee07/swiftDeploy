@@ -5,6 +5,7 @@ defines the common attribute for all other classes
 import uuid
 from datetime import datetime
 import models
+import binascii
 from sqlalchemy import Column, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -63,6 +64,8 @@ class BaseModel:
             elif db:
                 if key == 'password':
                     pass
+            elif key == 'salt':
+                new_dict[key] = binascii.hexlify(value).decode('utf-8')
             else:
                 new_dict[key] = value
         return new_dict

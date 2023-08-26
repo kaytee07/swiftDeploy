@@ -6,6 +6,17 @@ from api.v1.views import app_views
 from models.user import User
 from models import storage
 from flask import abort, request, jsonify
+import hashlib
+import binascii
+import os
+
+
+def hash_password(password):
+    salt = os.urandom(16)
+    rounds = 100000
+    hash_algo = hashlib.sha256
+    hk = hashlib.pbkdf2_hmac(hash_algo.name, password.encode('utf-8'), salt, rounds)
+    return binascii.hexlify(hk).decode('utf-8')
 
 
 @app_views.route("/users", strict_slashes=False)
@@ -58,6 +69,7 @@ def create_user():
     if 'email' not in data:
         abort(400, description="Missing email")
 
+    data['password'] = hash_password(data['password'])
     new_user = User(**data)
     new_user.save()
     return jsonify(new_user.to_dict()), 201
@@ -73,15 +85,18 @@ def update_user(user_id):
     user = storage.get(User, user_id)
     if user:
         for key, value in updates.items():
-            if key == 'id' or key == 'email' or key == 'created_at' or key == 'updated_at' or key == 'last_name' or key == 'first_name':
+            if key == 'id' or key == 'email' or key == 'created_at' or key == 'updated_at' or key == 'username':
                 pass
             else:
                 if key == 'password':
-                    user.password = value
+                    user.password = hash_password(value)
                     updated = True
-                elif key == 'username':
+                elif key == 'first_name':
                     updated = True
-                    user.username = value
+                    user.first_name = value
+                elif key == 'last_name':
+                    updated = True
+                    user.last_name = value
         if updated:
             storage.new(user)
             storage.save()
@@ -100,7 +115,7 @@ def login_user():
     user = storage.get(User, username=data['username'])
     if user:
         user_dict = user.to_dict()
-        if user_dict['password'] == data['password']:
+        if user_dict['password'] == hash_password(data['password']):
             return jsonify({
                 "password": user_dict['password'],
                 "login": "successfully"

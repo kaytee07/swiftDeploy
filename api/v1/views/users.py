@@ -15,7 +15,7 @@ def hash_password(password, salt=None):
     if salt is None:
         salt = os.urandom(16)
     rounds = 100000
-    hash_algo = hashlib.sha256
+    hash_algo = hashlib.sha256()
     hk = hashlib.pbkdf2_hmac(hash_algo.name, password.encode('utf-8'), salt, rounds)
     if salt:
         return binascii.hexlify(hk).decode('utf-8')

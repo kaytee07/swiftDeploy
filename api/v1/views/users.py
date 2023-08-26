@@ -73,7 +73,8 @@ def create_user():
     if 'email' not in data:
         abort(400, description="Missing email")
 
-    data['password'] = hash_password(data['password'])
+    data['password'] = hash_password(data['password'])['passwd']
+    data['salt'] = hash_password(data['password'])['salt']
     new_user = User(**data)
     new_user.save()
     return jsonify(new_user.to_dict()), 201

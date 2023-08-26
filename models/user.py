@@ -4,6 +4,7 @@ creat user class that inherit from BaseModel
 """
 from models.base_model import BaseModel, Base
 from sqlalchemy import Column, String
+from sqlalchemy.types import LargeBinary
 from sqlalchemy.orm import relationship
 from os import getenv
 
@@ -21,7 +22,7 @@ class User(BaseModel, Base):
         username = Column(String(60), nullable=False)
         email = Column(String(60), nullable=False)
         password = Column(String(140), nullable=False)
-        salt = Column(String(128))
+        salt = Column(LargeBinary)
         container = relationship('Container', backref='user')
     else:
         first_name = None

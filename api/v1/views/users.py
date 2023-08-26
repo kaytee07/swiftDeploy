@@ -11,12 +11,16 @@ import binascii
 import os
 
 
-def hash_password(password):
-    salt = os.urandom(16)
+def hash_password(password, salt=None):
+    if salt is None:
+        salt = os.urandom(16)
     rounds = 100000
     hash_algo = hashlib.sha256
     hk = hashlib.pbkdf2_hmac(hash_algo.name, password.encode('utf-8'), salt, rounds)
-    return binascii.hexlify(hk).decode('utf-8')
+    if salt:
+        return binascii.hexlify(hk).decode('utf-8')
+    else:
+        return {"passwd": binascii.hexlify(hk).decode('utf-8'), "salt": salt}
 
 
 @app_views.route("/users", strict_slashes=False)
@@ -89,7 +93,8 @@ def update_user(user_id):
                 pass
             else:
                 if key == 'password':
-                    user.password = hash_password(value)
+                    user.password = hash_password(value)['passwd']
+                    user.salt = hash_password(value)['salt']
                     updated = True
                 elif key == 'first_name':
                     updated = True
@@ -115,9 +120,8 @@ def login_user():
     user = storage.get(User, username=data['username'])
     if user:
         user_dict = user.to_dict()
-        if user_dict['password'] == hash_password(data['password']):
+        if user_dict['password'] == hash_password(data['password'], user_dict['salt']):
             return jsonify({
-                "password": user_dict['password'],
                 "login": "successfully"
             }), 200
         else:

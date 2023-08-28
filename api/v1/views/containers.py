@@ -14,8 +14,8 @@ from fabric import Connection
 def login_to_docker(dockerID, password):
     """
     login to dockerhub from assigned server
-    dockerID: dockerhub dockerID
-    password: dockerhub password
+    @dockerID: dockerhub dockerID
+    @password: dockerhub password
     """
     try:
         conn = Connection(host="ubuntu@52.87.212.95")
@@ -42,6 +42,11 @@ def logout_from_docker():
 
 
 def start_docker_container(dockerID, app_name):
+    """
+    start docker container from image on docker hub
+    @dockerID: user's dockerID
+    @app_name: user's app name on docker hub
+    """
     try:
         conn = Connection(host="ubuntu@52.87.212.95")
         result = conn.run(f"./startdockercontainer {dockerID} {app_name}")
@@ -50,6 +55,22 @@ def start_docker_container(dockerID, app_name):
         return {"error": "SSH connection error: " + str(e)}, 500
     except Exception as e:
         return {"error": "An error occurred: " + str(e)}, 500
+
+
+def stop_docker_container(containerID):
+    """
+    stop docker container
+    @containerID: user's dockerID
+    """
+    try:
+        conn = Connection(host="ubuntu@52.87.212.95")
+        result = conn.run(f"./stopdockercontainer {containerID}")
+        return result.stdout
+    except SSHException as e:
+        return {"error": "SSH connection error: " + str(e)}, 500
+    except Exception as e:
+        return {"error": "An error occurred: " + str(e)}, 500
+
 
 
 @app_views.route('/containers/<username>/hublogin', strict_slashes=False, methods=['POST'])
@@ -81,23 +102,30 @@ def logout_dockerHub():
 
 @app_views.route('/containers/<username>/start/', strict_slashes=False, methods=['POST'])
 def start_container(username):
+    """
+    api that starts container on server accepting app_name from user
+    """
     data = request.get_json()
 
     if not data:
         abort(400, description="Not a JSON")
 
-    if 'password' not in data:
-        abort(400, description="Missing password")
+    if 'app_name' not in data:
+        abort(400, description="Missing app name")
 
     user = storage.get(User, username=username).to_dict()
 
-    result = start_docker_container(user['dockerID'], data['app'])
+    result = start_docker_container(user['dockerID'], data['app_name'])
     if user:
         return jsonify({"user": result}), 200
     else:
-        abort(404)
+        abort(404, 'user not found')
 
 
-@app_views.route('/containers/<username>/stop/<container_id>', strict_slashes=False, methods=['POST'])
-def stop_container(username):
-    return jsonify({'status': 'stop container'}), 200
+@app_views.route('/containers/stop/<container_id>/', strict_slashes=False, methods=['POST'])
+def stop_container(container_id):
+    """
+    stops a specific container from running
+    """
+    result = stop_docker_container(container_id)
+    return jsonify({'status': result}), 200

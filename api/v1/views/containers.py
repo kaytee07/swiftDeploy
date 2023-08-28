@@ -11,14 +11,35 @@ from flask import abort, request, jsonify
 from fabric import Connection
 
 
-def login_to_docker(c, dockerID, password):
+def login_to_docker(dockerID, password):
+    """
+    login to dockerhub from assigned server
+    dockerID: dockerhub dockerID
+    password: dockerhub password
+    """
     try:
-        result = c.run(f"./logintodockerhub {dockerID} {password}")
+        conn = Connection(host="ubuntu@52.87.212.95")
+        result = conn.run(f"./logintodockerhub {dockerID} {password}")
         return result.stdout
     except SSHException as e:
         return {"error": "SSH connection error: " + str(e)}, 500
     except Exception as e:
         return {"error": "An error occurred: " + str(e)}, 500
+
+
+def logout_from_docker():
+    """
+    logout from dockerhub on assigned server
+    """
+    try:
+        conn = Connection(host="ubuntu@52.87.212.95")
+        result = conn.run("./logoutdockerhub")
+        return result.stdout
+    except SSHException as e:
+        return {"error": "SSH connection error: " + str(e)}, 500
+    except Exception as e:
+        return {"error": "An error occurred: " + str(e)}, 500
+
 
 @app_views.route('/containers/<username>/hublogin', strict_slashes=False, methods=['POST'])
 def login_dockerHub(username):
@@ -31,19 +52,20 @@ def login_dockerHub(username):
         abort(400, description="Not a JSON")
     user = storage.get(User, username=username).to_dict()
     if user:
-        conn = Connection(host="ubuntu@52.87.212.95")
-        result = login_to_docker(conn, user['dockerID'], data['password'])
-
+        result = login_to_docker(user['dockerID'], data['password'])
         return jsonify({
             "dockerID": user['dockerID'],
             "hubpass": data["password"],
             "message": result
         }), 200
+    else:
+        abort(404, description="user cannot be found")
 
 
-@app_views.route('/containers/<username>/hublogout', strict_slashes=False, methods=['POST'])
+@app_views.route('/containers/hublogout', strict_slashes=False, methods=['POST'])
 def logout_dockerHub():
-    return jsonify({"status": "loggedout"})
+    result = logout_from_docker()
+    return jsonify({"status": result})
 
 
 @app_views.route('/containers/<username>/start/', strict_slashes=False, methods=['POST'])

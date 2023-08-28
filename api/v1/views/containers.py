@@ -41,6 +41,17 @@ def logout_from_docker():
         return {"error": "An error occurred: " + str(e)}, 500
 
 
+def start_docker_container(dockerID, app_name):
+    try:
+        conn = Connection(host="ubuntu@52.87.212.95")
+        result = conn.run(f"./startdockercontainer {dockerID} {app_name}")
+        return result.stdout
+    except SSHException as e:
+        return {"error": "SSH connection error: " + str(e)}, 500
+    except Exception as e:
+        return {"error": "An error occurred: " + str(e)}, 500
+
+
 @app_views.route('/containers/<username>/hublogin', strict_slashes=False, methods=['POST'])
 def login_dockerHub(username):
     """
@@ -79,13 +90,10 @@ def start_container(username):
         abort(400, description="Missing password")
 
     user = storage.get(User, username=username).to_dict()
+
+    result = start_docker_container(user['dockerID'], data['app'])
     if user:
-        return jsonify({
-            'name': data['name'],
-            'dockerID': data['dockerID'],
-            'status': 'start container',
-            'first_name': user['first_name']
-        }), 200
+        return jsonify({"user": result}), 200
     else:
         abort(404)
 

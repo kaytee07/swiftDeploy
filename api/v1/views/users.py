@@ -19,9 +19,10 @@ def hash_password(password, salt=None):
         salt = os.urandom(16)
         hk = hashlib.pbkdf2_hmac(hash_algo.name, password.encode('utf-8'), salt, rounds)
         hashed_password = binascii.hexlify(hk).decode('utf-8')
-        return {"passwd": hashed_password, "salt": binascii.hexlify(salt).decode('utf-8')}
+        return {"passwd": hashed_password, "salt": salt}
     else:
-        hk = hashlib.pbkdf2_hmac(hash_algo.name, password, salt, rounds)
+        salt_bytes = binascii.unhexlify(salt)
+        hk = hashlib.pbkdf2_hmac(hash_algo.name, password.encode('utf-8'), salt_bytes, rounds)
         hashed_password = binascii.hexlify(hk).decode('utf-8')
         return hashed_password
 
@@ -76,9 +77,9 @@ def create_user():
     if 'email' not in data:
         abort(400, description="Missing email")
 
-    print(hash_password(data['password']))
-    data['password'] = hash_password(data['password'])['passwd']
-    data['salt'] = hash_password(data['password'])['salt']
+    hashed_pass = hash_password(data['password'])
+    data['password'] = hashed_pass['passwd']
+    data['salt'] = hashed_pass['salt']
     new_user = User(**data)
     new_user.save()
     return jsonify(new_user.to_dict()), 201

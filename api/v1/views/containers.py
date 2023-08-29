@@ -5,6 +5,8 @@ start, stop containers and pull images
 from models import storage
 from models.container import Container
 from paramiko import SSHException
+import requests
+import json
 from models.user import User
 from api.v1.views import app_views
 from flask import abort, request, jsonify
@@ -129,3 +131,36 @@ def stop_container(container_id):
     """
     result = stop_docker_container(container_id)
     return jsonify({'status': result}), 200
+
+
+@app_views.route('/containers', strict_slashes=False)
+def get_containers():
+    """
+    get pre defined containers and those imported by you
+    """
+    api_url = 'http://52.87.212.95:2375/images/json'
+    response = requests.get(api_url)
+
+    if response.status_code == 200:
+        results = response.json()
+        return jsonify(results), 200
+    else:
+        return jsonify({"error": "Failed to fetch containers"}), 500
+
+
+@app_views.route('/container/pull')
+def pull_containers():
+    """
+    pull container from dockerhub
+    """
+    data = request.get_json()
+    api_url = f"http://localhost:2375/images/create?fromImage={data['name']}&tag={data['tag']}"
+
+    response = requests.post(api_url)
+
+    if response.status_code == 200:
+        print(f"Image {data['name']}:{data['tag']} pulled successfully.")
+        return jsonify(response), 200
+    else:
+        print(f"Failed to pull image {data['name']}:{data['tag']}.")
+        abort(404, description=response.text)

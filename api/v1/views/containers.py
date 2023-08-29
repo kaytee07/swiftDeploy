@@ -138,14 +138,12 @@ def get_containers():
     """
     get pre defined containers and those imported by you
     """
-    api_url = 'http://52.87.212.95:2375/images/json'
-    response = requests.get(api_url)
-
-    if response.status_code == 200:
-        results = response.json()
-        return jsonify(results), 200
-    else:
-        return jsonify({"error": "Failed to fetch containers"}), 500
+    containers = {}
+    get_cont = storage.all(Container)
+    for key, value in get_cont.items():
+        containers[value.to_dict()['name']] = value.to_dict()
+    print(containers)
+    return jsonify(containers), 200
 
 
 @app_views.route('/container/pull')

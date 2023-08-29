@@ -13,8 +13,11 @@ SD_TYPE_STORAGE = getenv('SD_TYPE_STORAGE')
 
 
 class MyEnum(enum.Enum):
-    predefined = "predifined"
+    predefined = "predefined"
     imported = "imported"
+
+    def __str__(self):
+        return self.value
 
 
 class Container(BaseModel, Base):

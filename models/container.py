@@ -29,14 +29,14 @@ class Container(BaseModel, Base):
         status = Column(String(60), nullable=False)
         container_id = Column(String(64), nullable=False)
         tag = Column(String(60))
-        type = Column(Enum(MyEnum))
+        types = Column(Enum(MyEnum))
         user_id = Column(String(60), ForeignKey('users.id'))
     else:
         name = None
         status = None
         container_id = None
         tag = None
-        type = None
+        types = None
         user_id = None
 
     def __init__(self, *args, **kwargs):

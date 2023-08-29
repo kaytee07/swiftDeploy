@@ -79,7 +79,7 @@ class DBStorage:
         Session = scoped_session(sessionmaker(bind=self.__engine, expire_on_commit=False))
         self.__session = Session()
 
-    def get(self, cls, id=None, username=None):
+    def get(self, cls, id=None, username=None, container_name=None):
         """
         get user based on user id passed or  username
         """
@@ -89,6 +89,9 @@ class DBStorage:
                 return obj
             elif username:
                 obj = self.__session.query(cls).filter_by(username=username).first()
+                return obj
+            elif cont:
+                obj = self.__session.query(cls).filter_by(name=container_name).first()
                 return obj
         else:
             None

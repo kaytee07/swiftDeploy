@@ -4,39 +4,10 @@ start, stop containers and pull images
 """
 from models import storage
 from models.container import Container
-from paramiko import SSHException
 import requests
-import json
 from models.user import User
 from api.v1.views import app_views
 from flask import abort, request, jsonify
-from fabric import Connection
-
-
-
-@app_views.route('/containers/<username>/hublogin', strict_slashes=False, methods=['POST'])
-def login_dockerHub(username):
-    """
-    login into user's docker hub account with their docker from requests
-    and password they'll enter
-    """
-    data = request.get_json()
-    if not data:
-        abort(400, description="Not a JSON")
-    user = storage.get(User, username=username).to_dict()
-    if user:
-        return jsonify({
-            "dockerID": user['dockerID'],
-            "hubpass": data["password"],
-            "message": result
-        }), 200
-    else:
-        abort(404, description="user cannot be found")
-
-
-@app_views.route('/containers/hublogout', strict_slashes=False, methods=['POST'])
-def logout_dockerHub():
-    return jsonify({"status": result})
 
 
 @app_views.route('/containers/start/<container_id>', strict_slashes=False, methods=['POST'])
@@ -48,12 +19,15 @@ def start_container(container_id):
     start_url = f"{base_url}/containers/{container_id}/start"
     start_response = requests.post(start_url)
     if start_response.status_code == 204:
-        api_url = {base_url}/containers/{container_id}/json
-        
-        print("Container started successfully")
+        api_url = f"{base_url}/containers/{container_id}/json"
+        container_info = requests.get(api_url)
+        if container_info.status_code == 200:
+            container = container_info.json()
+            return jsonify(container), 200
+        else:
+            abort(404)
     else:
-        print("Failed to start container")
-
+        abort(404)
 
 
 @app_views.route('/containers/stop/<container_id>/', strict_slashes=False, methods=['POST'])
@@ -61,7 +35,19 @@ def stop_container(container_id):
     """
     stops a specific container from running
     """
-    return jsonify({'status': result}), 200
+    base_url = "http://52.87.212.95:2375"
+    stop_url = f"{base_url}/containers/{container_id}/stop"
+    stop_response = requests.post(stop_url)
+    if stop_response.status_code == 204:
+        api_url = f"{base_url}/containers/{container_id}/json"
+        container_info = requests.get(api_url)
+        if container_info.status_code == 200:
+            container = container_info.json()
+            return jsonify(container), 200
+        else:
+            abort(404)
+    else:
+        abort(404)
 
 
 @app_views.route('/containers', strict_slashes=False)

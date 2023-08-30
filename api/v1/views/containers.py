@@ -15,13 +15,16 @@ def start_container(container_id):
     """
     api that starts container on server accepting app_name from user
     """
+    print('it hit')
     base_url = "http://52.87.212.95:2375"
     start_url = f"{base_url}/containers/{container_id}/start"
     start_response = requests.post(start_url)
     if start_response.status_code == 204:
+        print('did it hit')
         api_url = f"{base_url}/containers/{container_id}/json"
         container_info = requests.get(api_url)
         if container_info.status_code == 200:
+            print('yes it hit')
             container = container_info.json()
             return jsonify(container), 200
         else:
@@ -35,6 +38,8 @@ def stop_container(container_id):
     """
     stops a specific container from running
     """
+    get_cont = storage.get(Container, container_id=container_id).to_dict()
+    print(get_cont)
     base_url = "http://52.87.212.95:2375"
     stop_url = f"{base_url}/containers/{container_id}/stop"
     stop_response = requests.post(stop_url)
@@ -50,16 +55,18 @@ def stop_container(container_id):
         abort(404)
 
 
-@app_views.route('/containers', strict_slashes=False)
-def get_containers():
+@app_views.route('/containers/<username>', strict_slashes=False)
+def get_containers(username):
     """
     get pre defined containers and those imported by you
     """
     containers = {}
+    users = storage.get(User, username=username).to_dict()
     get_cont = storage.all(Container)
     for key, value in get_cont.items():
-        containers[value.to_dict()['name']] = value.to_dict()
-    print(containers)
+        print(value.to_dict()['types'])
+        if value.to_dict()['types'] is None or  value.to_dict()['user_id'] == users['id']:
+            containers[value.to_dict()['name']] = value.to_dict()
     return jsonify(containers), 200
 
 

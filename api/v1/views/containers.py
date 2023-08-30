@@ -13,67 +13,6 @@ from flask import abort, request, jsonify
 from fabric import Connection
 
 
-def login_to_docker(dockerID, password):
-    """
-    login to dockerhub from assigned server
-    @dockerID: dockerhub dockerID
-    @password: dockerhub password
-    """
-    try:
-        conn = Connection(host="ubuntu@52.87.212.95")
-        result = conn.run(f"./logintodockerhub {dockerID} {password}")
-        return result.stdout
-    except SSHException as e:
-        return {"error": "SSH connection error: " + str(e)}, 500
-    except Exception as e:
-        return {"error": "An error occurred: " + str(e)}, 500
-
-
-def logout_from_docker():
-    """
-    logout from dockerhub on assigned server
-    """
-    try:
-        conn = Connection(host="ubuntu@52.87.212.95")
-        result = conn.run("./logoutdockerhub")
-        return result.stdout
-    except SSHException as e:
-        return {"error": "SSH connection error: " + str(e)}, 500
-    except Exception as e:
-        return {"error": "An error occurred: " + str(e)}, 500
-
-
-def start_docker_container(dockerID, app_name):
-    """
-    start docker container from image on docker hub
-    @dockerID: user's dockerID
-    @app_name: user's app name on docker hub
-    """
-    try:
-        conn = Connection(host="ubuntu@52.87.212.95")
-        result = conn.run(f"./startdockercontainer {dockerID} {app_name}")
-        return result.stdout
-    except SSHException as e:
-        return {"error": "SSH connection error: " + str(e)}, 500
-    except Exception as e:
-        return {"error": "An error occurred: " + str(e)}, 500
-
-
-def stop_docker_container(containerID):
-    """
-    stop docker container
-    @containerID: user's dockerID
-    """
-    try:
-        conn = Connection(host="ubuntu@52.87.212.95")
-        result = conn.run(f"./stopdockercontainer {containerID}")
-        return result.stdout
-    except SSHException as e:
-        return {"error": "SSH connection error: " + str(e)}, 500
-    except Exception as e:
-        return {"error": "An error occurred: " + str(e)}, 500
-
-
 
 @app_views.route('/containers/<username>/hublogin', strict_slashes=False, methods=['POST'])
 def login_dockerHub(username):
@@ -86,7 +25,6 @@ def login_dockerHub(username):
         abort(400, description="Not a JSON")
     user = storage.get(User, username=username).to_dict()
     if user:
-        result = login_to_docker(user['dockerID'], data['password'])
         return jsonify({
             "dockerID": user['dockerID'],
             "hubpass": data["password"],
@@ -98,7 +36,6 @@ def login_dockerHub(username):
 
 @app_views.route('/containers/hublogout', strict_slashes=False, methods=['POST'])
 def logout_dockerHub():
-    result = logout_from_docker()
     return jsonify({"status": result})
 
 
@@ -116,8 +53,6 @@ def start_container(username):
         abort(400, description="Missing app name")
 
     user = storage.get(User, username=username).to_dict()
-
-    result = start_docker_container(user['dockerID'], data['app_name'])
     if user:
         return jsonify({"user": result}), 200
     else:
@@ -129,7 +64,6 @@ def stop_container(container_id):
     """
     stops a specific container from running
     """
-    result = stop_docker_container(container_id)
     return jsonify({'status': result}), 200
 
 
@@ -146,19 +80,33 @@ def get_containers():
     return jsonify(containers), 200
 
 
-@app_views.route('/container/pull')
-def pull_containers():
+@app_views.route('/containers/<username>/pull', strict_slashes=False, methods=['POST'])
+def pull_containers(username):
     """
-    pull container from dockerhub
+    pull container from Docker Hub
     """
     data = request.get_json()
-    api_url = f"http://localhost:2375/images/create?fromImage={data['name']}&tag={data['tag']}"
 
+    if 'docker_id' in data and data['docker_id']:
+        full_image_name = f"{data['docker_id']}/{data['name']}:{data['tag']}"
+    else:
+        full_image_name = f"{data['name']}:{data['tag']}"
+
+    api_url = f'http://52.87.212.95:2375/images/create?fromImage={full_image_name}'
     response = requests.post(api_url)
 
     if response.status_code == 200:
-        print(f"Image {data['name']}:{data['tag']} pulled successfully.")
-        return jsonify(response), 200
+        api_url = 'http://52.87.212.95:2375/images/json'
+        response = requests.get(api_url)
+
+        if response.status_code == 200:
+            images = response.json()
+
+            for image in images:
+                if full_image_name in image.get('RepoTags', []):
+                    return jsonify({full_image_name: data['tag']}), 200
+
+            abort(404, description=f"Image '{full_image_name}' not found.")
     else:
-        print(f"Failed to pull image {data['name']}:{data['tag']}.")
         abort(404, description=response.text)
+

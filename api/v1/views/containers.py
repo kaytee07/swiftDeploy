@@ -15,22 +15,30 @@ def start_container(container_id):
     """
     api that starts container on server accepting app_name from user
     """
-    print('it hit')
-    base_url = "http://52.87.212.95:2375"
-    start_url = f"{base_url}/containers/{container_id}/start"
-    start_response = requests.post(start_url)
-    if start_response.status_code == 204:
-        print('did it hit')
-        api_url = f"{base_url}/containers/{container_id}/json"
-        container_info = requests.get(api_url)
-        if container_info.status_code == 200:
-            print('yes it hit')
-            container = container_info.json()
-            return jsonify(container), 200
-        else:
-            abort(404)
-    else:
-        abort(404)
+    try:
+        get_cont = storage.get(Container, container_id=container_id).to_dict()
+        print(get_cont)
+
+        remote_docker_host = 'http://52.87.212.95:2375'
+        headers = {'Content-Type': 'application/json'}
+
+        create_url = f"{remote_docker_host}/containers/create"
+        create_data = {
+            "Image": f"{get_cont['name']}:{get_cont['tag']}",
+            "Detach": True
+        }
+
+        response = requests.post(create_url, json=create_data, headers=headers)
+        container_id = response.json()
+        print(container_id)
+
+        return jsonify({response.json}), 200
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred: {e}")
+        abort(500)
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        abort(500)
 
 
 @app_views.route('/containers/stop/<container_id>/', strict_slashes=False, methods=['POST'])
@@ -38,21 +46,32 @@ def stop_container(container_id):
     """
     stops a specific container from running
     """
-    get_cont = storage.get(Container, container_id=container_id).to_dict()
-    print(get_cont)
-    base_url = "http://52.87.212.95:2375"
-    stop_url = f"{base_url}/containers/{container_id}/stop"
-    stop_response = requests.post(stop_url)
-    if stop_response.status_code == 204:
-        api_url = f"{base_url}/containers/{container_id}/json"
-        container_info = requests.get(api_url)
-        if container_info.status_code == 200:
-            container = container_info.json()
-            return jsonify(container), 200
+    try:
+        get_cont = storage.get(Container, container_id=container_id).to_dict()
+        print(get_cont)
+        stop_url = f"http://52.87.212.95:2375/containers/{container_id}/start"
+        stop_response = requests.post(stop_url)
+
+        if stop_response.status_code == 204:
+            print('did it hit')
+
+            api_url = f"http://52.87.212.95:2375/containers/{container_id}/json"
+            container_info = requests.get(api_url)
+
+            if container_info.status_code == 200:
+                print('yes it hit')
+                container = container_info.json()
+                return jsonify(container), 200
+            else:
+                abort(404)
         else:
             abort(404)
-    else:
-        abort(404)
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred: {e}")
+        abort(500)
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        abort(500)
 
 
 @app_views.route('/containers/<username>', strict_slashes=False)

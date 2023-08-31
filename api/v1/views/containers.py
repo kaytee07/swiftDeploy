@@ -8,7 +8,7 @@ import requests
 from models.user import User
 from api.v1.views import app_views
 from flask import abort, request, jsonify
-
+import docker
 
 @app_views.route('/containers/start/<container_id>', strict_slashes=False, methods=['POST'])
 def start_container(container_id):
@@ -16,23 +16,34 @@ def start_container(container_id):
     api that starts container on server accepting app_name from user
     """
     try:
-        get_cont = storage.get(Container, container_id=container_id).to_dict()
-        print(get_cont)
+        get_cont = storage.get(Container, container_id=container_id)
+        get_cont_dict = get_cont.to_dict()
 
         remote_docker_host = 'http://52.87.212.95:2375'
         headers = {'Content-Type': 'application/json'}
 
         create_url = f"{remote_docker_host}/containers/create"
         create_data = {
-            "Image": f"{get_cont['name']}:{get_cont['tag']}",
+            "Image": f"{get_cont_dict['name']}:{get_cont_dict['tag']}",
             "Detach": True
         }
 
         response = requests.post(create_url, json=create_data, headers=headers)
-        container_id = response.json()
+        container_id = response.json()['Id']
         print(container_id)
-
-        return jsonify({response.json}), 200
+        start_url = f"http://52.87.212.95:2375/containers/{container_id}/start"
+        start_container = requests.post(start_url)
+        if start_container.status_code == 204:
+            api_url = f"http://52.87.212.95:2375/containers/{container_id}/json"
+            container_info = requests.get(api_url)
+            if container_info.status_code == 200:
+                container = container_info.json()
+                info = container['State']['Status']
+                if info == 'running':
+                    get_cont.status = info
+                    storage.new(get_cont)
+                    storage.save()
+                return jsonify(container), 200
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
         abort(500)

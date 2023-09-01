@@ -5,7 +5,7 @@ this is a view for users
 from api.v1.views import app_views
 from models.user import User
 from models import storage
-from flask import abort, request, jsonify
+from flask import abort, request, jsonify, render_template
 import hashlib
 import binascii
 import os
@@ -116,21 +116,24 @@ def update_user(user_id):
         abort(400, description="Not a JSON")
 
 
-@app_views.route("/users/login", strict_slashes=False, methods=['POST'])
+@app_views.route("/login", strict_slashes=False, methods=['POST', 'GET'])
 def login_user():
     """
     check passed password and username against password and
     username stored in database
     """
-    data = request.get_json()
-    user = storage.get(User, username=data['username'])
-    if user:
-        user_dict = user.to_dict()
-        if user_dict['password'] == hash_password(data['password'], user_dict['salt']):
-            return jsonify({
-                "login": "successfully"
-            }), 200
+    if request.method == 'POST':
+        data = request.get_json()
+        user = storage.get(User, username=data['username'])
+        if user:
+            user_dict = user.to_dict()
+            if user_dict['password'] == hash_password(data['password'], user_dict['salt']):
+                return jsonify({
+                    "login": "successfully"
+                }), 200
+            else:
+                abort(404, description="incorrect username or password")
         else:
-            abort(404, description="incorrect username or password")
+            abort(404, description="User not found")
     else:
-        abort(404, description="User not found")
+        return render_template('login.html')

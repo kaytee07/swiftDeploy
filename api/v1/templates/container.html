@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/container.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Stardos+Stencil:wght@400;700&display=swap" rel="stylesheet">
+    <title>SwiftDeploy</title>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <h4>SwiftDeploy</h4>
+        </div>
+        <div class="logout_btn">
+            <button><a href="{{ url_for('appviews.logout') }}">logout</a></button>
+        </div>
+    </header>
+    <section class="main">
+        <div class="pull_cont">
+            <button>pull container</button>
+        </div>
+        <div class="my_containers">
+            <h3>MyContainers</h3>
+            <article class="head">
+                <div><h5>name</h5></div>
+                <div><h5>id</h5></div>
+                <div><h5>state</h5></div>
+                <div><h5>action</h5></div>
+                <div><h5>open</h5></div>
+            </article>
+            <ul class="containers">
+                <li class="container">
+                    <h5>Postgre</h5>
+                    <h5 class="id">eyyr76658ydguge</h5>
+                    <h5>Running</h5>
+                    <button>Stop</button>
+                    <button>open</button>
+                </li>
+            </ul>
+
+            <div class="pull_card">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-square-fill"
+                    viewBox="0 0 16 16">
+                    <path
+                        d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm3.354 4.646L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708z" />
+                </svg>
+                <h3>Pull container</h3>
+                <form>
+                    <label for="image_name">image name</label><br>
+                    <input type="text" id="image_name" name="img"><br>
+                    <label for="docker_id">docker id</label><br>
+                    <input type="text" placeholder="optional" id="docker_id" name="did"><br>
+                    <button>Pull container</button>
+                </form>
+            </div>
+        </div>
+    </section>
+    <script src="static/dash.js" async></script>
+</body>
+</html>

@@ -64,25 +64,28 @@ def delete_user(user_id):
         abort(404)
 
 
-@app_views.route("/users", methods=['POST'], strict_slashes=False)
+@app_views.route("/signup", methods=['POST', 'GET'], strict_slashes=False)
 def create_user():
-    data = request.get_json()
+    if request.method == 'POST':
+        data = request.get_json()
 
-    if not data:
-        abort(400, description="Not a JSON")
+        if not data:
+            abort(400, description="Not a JSON")
 
-    if 'password' not in data:
-        abort(400, description="Missing password")
+        if 'password' not in data:
+            abort(400, description="Missing password")
 
-    if 'email' not in data:
-        abort(400, description="Missing email")
+        if 'email' not in data:
+            abort(400, description="Missing email")
 
-    hashed_pass = hash_password(data['password'])
-    data['password'] = hashed_pass['passwd']
-    data['salt'] = hashed_pass['salt']
-    new_user = User(**data)
-    new_user.save()
-    return jsonify(new_user.to_dict()), 201
+        hashed_pass = hash_password(data['password'])
+        data['password'] = hashed_pass['passwd']
+        data['salt'] = hashed_pass['salt']
+        new_user = User(**data)
+        new_user.save()
+        return jsonify(new_user.to_dict()), 201
+    else:
+        return render_template('signup.html')
 
 
 @app_views.route("/users/<user_id>", methods=['PUT'])

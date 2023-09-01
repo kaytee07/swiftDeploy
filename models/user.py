@@ -22,7 +22,6 @@ class User(BaseModel, Base):
         username = Column(String(60), nullable=False)
         email = Column(String(60), nullable=False)
         password = Column(String(140), nullable=False)
-        dockerID = Column(String(128), nullable=False)
         salt = Column(LargeBinary)
         container = relationship('Container', backref='user')
     else:

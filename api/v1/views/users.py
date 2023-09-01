@@ -147,6 +147,15 @@ def login_user():
         return render_template('login.html')
 
 
+@app_views.route('/logout', strict_slashes=False)
+def logout():
+    """
+    logout from current session
+    """
+    session.clear()
+    return redirect(url_for('appviews.login_user'))
+
+
 @app_views.route("/home", strict_slashes=False)
 def home():
     if 'user_id' in session:

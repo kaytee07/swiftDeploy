@@ -10,6 +10,9 @@ from flask import Flask
 app = Flask(__name__, static_url_path='/static', static_folder='static')
 app.register_blueprint(app_views, url_prefix='/api/v1')
 
+session_key = getenv('SD_SESSION_KEY')
+
+app.secret_key = session_key
 
 @app.teardown_appcontext
 def close_storage(error):

@@ -1,0 +1,116 @@
+body header {
+    display: flex;
+    justify-content: space-between;
+}
+
+div.logo {
+    font-family: 'Stardos Stencil', cursive;
+    color: #3b37ff;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    height: 97vh;
+}
+
+div.pull_cont {
+    float: right;
+}
+
+div.pull_cont button {
+    cursor: pointer;
+}
+
+ul.containers {
+    padding: 0px;
+    font-family: 'Roboto', sans-serif;
+}
+
+ul.containers li.container {
+    display: flex;
+    justify-content: space-around;
+}
+
+ul.containers li.container button {
+    border: none;
+    margin: 10px 0px;
+    height: 36px;
+    min-width: 47px;
+    border-radius: 5px;
+    background-color: #3b37ff;
+    color: white;
+}
+
+div.logout_btn button {
+    width: 120px;
+    height: 31px;
+    border: none;
+    color: white;
+    background-color: #3b37ff;
+    border-radius: 5px;
+}
+
+div.logout_btn button a {
+    text-decoration: none;
+    color: white;
+}
+
+div.logout_btn {
+    display: flex;
+    align-items: center;
+}
+
+article.head {
+    border: 1px solid #3b37ff;
+    display: flex;
+    justify-content: space-around;
+}
+
+div.pull_card {
+    width: 211px;
+    padding: 0px 40px;
+    height: 300px;
+    position: absolute;
+    margin: 0px auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 9px 0px;
+    border: 1px solid #3b37ff;
+    border-radius: 5px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    display: none;
+}
+
+div.pull_card form {
+    margin-top:20px
+}
+
+div.pull_card form input {
+    margin: 9px 0px;
+    height: 30px;
+    border: 1px solid;
+    border-radius: 5px;
+}
+
+div.pull_card form button {
+    margin: 9px 0px;
+    border: none;
+    height: 36px;
+    background-color: #3b37ff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+svg {
+    position: absolute;
+    top: 1.4em;
+    left: 16em;
+    width: 1em;
+    color: #3b37ff;
+    cursor: pointer;
+}

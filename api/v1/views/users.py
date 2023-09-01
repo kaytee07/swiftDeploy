@@ -5,7 +5,7 @@ this is a view for users
 from api.v1.views import app_views
 from models.user import User
 from models import storage
-from flask import abort, request, jsonify, render_template, session, flash
+from flask import abort, request, jsonify, render_template, session, flash, redirect, url_for
 import hashlib
 import binascii
 import os
@@ -67,23 +67,28 @@ def delete_user(user_id):
 @app_views.route("/signup", methods=['POST', 'GET'], strict_slashes=False)
 def create_user():
     if request.method == 'POST':
-        data = request.get_json()
+        data = {}
+        form_data = request.form
+        for key, value in form_data.items():
+            data[key] = value
 
-        if not data:
-            abort(400, description="Not a JSON")
+        if not form_data:
+            return redirect(url_for('appviews.create_user'))
 
-        if 'password' not in data:
-            abort(400, description="Missing password")
+        if 'password' not in form_data:
+            print('password')
+            return redirect(url_for('appviews.create_user'))
 
-        if 'email' not in data:
-            abort(400, description="Missing email")
+        if 'email' not in form_data:
+            print('email')
+            return redirect(url_for('appviews.create_user'))
 
         hashed_pass = hash_password(data['password'])
         data['password'] = hashed_pass['passwd']
         data['salt'] = hashed_pass['salt']
         new_user = User(**data)
         new_user.save()
-        return jsonify(new_user.to_dict()), 201
+        return redirect(url_for('appviews.login_user'))
     else:
         return render_template('signup.html')
 
@@ -126,17 +131,26 @@ def login_user():
     username stored in database
     """
     if request.method == 'POST':
-        data = request.get_json()
-        user = storage.get(User, username=data['username'])
+        user = storage.get(User, username=request.form['username'])
+        print(request.form['username'])
+        print(request.form['password'])
         if user:
             user_dict = user.to_dict()
-            if user_dict['password'] == hash_password(data['password'], user_dict['salt']):
-                return jsonify({
-                    "login": "successfully"
-                }), 200
+            if user_dict['password'] == hash_password(request.form['password'], user_dict['salt']):
+                session['user_id'] = user_dict['id']
+                return redirect(url_for('appviews.home'))
             else:
                 abort(404, description="incorrect username or password")
         else:
             abort(404, description="User not found")
     else:
         return render_template('login.html')
+
+
+@app_views.route("/home", strict_slashes=False)
+def home():
+    if 'user_id' in session:
+        return render_template('container.html')
+    else:
+        flash('You need to log in to access this page.', 'danger')
+        return redirect(url_for('appviews.login_user'))

@@ -7,7 +7,7 @@ from models import storage
 from api.v1.views import app_views
 from flask import Flask
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static', static_folder='static')
 app.register_blueprint(app_views, url_prefix='/api/v1')
 
 

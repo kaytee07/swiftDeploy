@@ -5,7 +5,7 @@ this is a view for users
 from api.v1.views import app_views
 from models.user import User
 from models import storage
-from flask import abort, request, jsonify, render_template
+from flask import abort, request, jsonify, render_template, session, flash
 import hashlib
 import binascii
 import os

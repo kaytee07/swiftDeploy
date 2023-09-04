@@ -98,10 +98,10 @@ def statss(username):
         for key, value in get_cont.items():
             print(value.to_dict()['types'])
             if value.to_dict()['types'] is None or value.to_dict()['user_id'] == users['id']:
+                print('yes')
                 containers[value.to_dict()['name']] = value.to_dict()
             else:
-                abort(404)
-        print(containers)
+                continue
         return jsonify(containers), 200
     else:
         abort(404)
@@ -113,20 +113,25 @@ def pull_containers(username):
     pull container from Docker Hub
     """
     print('pull')
-    data = request.get_json()
+    data = request.form
+    docker_id = data.get('docker_id')
+    img_name = data.get('name')
+    print(docker_id)
+    print(img_name)
     img_data = {}
-
-    if 'docker_id' in data and data['docker_id']:
-        full_image_name = f"{data['docker_id']}/{data['name']}:{data['tag']}"
+    if docker_id:
+        full_image_name = f"{docker_id}/{img_name}:latest"
     else:
-        full_image_name = f"{data['name']}:{data['tag']}"
+        full_image_name = f"{data['name']}:latest"
 
     api_url = f'http://52.87.212.95:2375/images/create?fromImage={full_image_name}'
+    print(api_url)
     response = requests.post(api_url)
 
     if response.status_code == 200:
         api_url = 'http://52.87.212.95:2375/images/json'
         response = requests.get(api_url)
+        print(response)
 
         if response.status_code == 200:
             images = response.json()

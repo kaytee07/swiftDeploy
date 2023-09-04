@@ -133,10 +133,7 @@ def login_user():
         user = storage.get(User, username=request.form['username'])
         if user:
             user_dict = user.to_dict()
-            print(user_dict['password'])
-            print(hash_password(request.form['password'], user_dict['salt']))
             if user_dict['password'] == hash_password(request.form['password'], user_dict['salt']):
-                print('here')
                 session['user_id'] = user_dict['id']
                 session['username'] = user_dict['username']
                 return redirect(url_for('appviews.home'))

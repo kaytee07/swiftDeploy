@@ -7,7 +7,7 @@ from models.container import Container
 import requests
 from models.user import User
 from api.v1.views import app_views
-from flask import abort, request, jsonify, session
+from flask import abort, request, jsonify, session, redirect, url_for
 
 
 @app_views.route('/containers/start/<container_id>', strict_slashes=False, methods=['POST'])
@@ -148,7 +148,7 @@ def pull_containers(username):
                     new_container = Container(**img_data)
                     storage.new(new_container)
                     storage.save()
-                    return jsonify(new_container.to_dict()), 200
+                    return redirect(url_for('appviews.home'))
 
             abort(404, description=f"Image '{full_image_name}' not found.")
     else:

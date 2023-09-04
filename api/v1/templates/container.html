@@ -55,11 +55,11 @@
                         d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm3.354 4.646L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708z" />
                 </svg>
                 <h3>Pull container</h3>
-                <form>
+                <form action="{{ url_for('appviews.pull_containers', username=username) }}" method="post">
                     <label for="image_name">image name</label><br>
-                    <input type="text" id="image_name" name="img"><br>
+                    <input type="text" id="image_name" name="name"><br>
                     <label for="docker_id">docker id</label><br>
-                    <input type="text" placeholder="optional" id="docker_id" name="did"><br>
+                    <input type="text" placeholder="optional" id="docker_id" name="docker_id"><br>
                     <button>Pull container</button>
                 </form>
             </div>

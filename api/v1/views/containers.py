@@ -7,8 +7,8 @@ from models.container import Container
 import requests
 from models.user import User
 from api.v1.views import app_views
-from flask import abort, request, jsonify
-import docker
+from flask import abort, request, jsonify, session
+
 
 @app_views.route('/containers/start/<container_id>', strict_slashes=False, methods=['POST'])
 def start_container(container_id):
@@ -46,32 +46,32 @@ def start_container(container_id):
                 return jsonify(container), 200
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
-        abort(500)
+        abort(404)
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-        abort(500)
+        abort(404)
 
 
-@app_views.route('/containers/stop/<container_id>/', strict_slashes=False, methods=['POST'])
-def stop_container(container_id):
+@app_views.route('/containers/stop/<image_id>/<container_id>', strict_slashes=False, methods=['POST'])
+def stop_container(image_id, container_id):
     """
     stops a specific container from running
     """
     try:
-        get_cont = storage.get(Container, container_id=container_id).to_dict()
-        print(get_cont)
-        stop_url = f"http://52.87.212.95:2375/containers/{container_id}/start"
+        get_cont = storage.get(Container, container_id=image_id)
+        stop_url = f"http://52.87.212.95:2375/containers/{container_id}/stop"
         stop_response = requests.post(stop_url)
-
         if stop_response.status_code == 204:
             print('did it hit')
-
             api_url = f"http://52.87.212.95:2375/containers/{container_id}/json"
             container_info = requests.get(api_url)
-
             if container_info.status_code == 200:
-                print('yes it hit')
                 container = container_info.json()
+                info = container['State']['Status']
+                if info != 'running':
+                    get_cont.status = info
+                    storage.new(get_cont)
+                    storage.save()
                 return jsonify(container), 200
             else:
                 abort(404)
@@ -79,25 +79,32 @@ def stop_container(container_id):
             abort(404)
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
-        abort(500)
+        abort(404)
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-        abort(500)
+        abort(404)
 
 
-@app_views.route('/containers/<username>', strict_slashes=False)
-def get_containers(username):
+@app_views.route("/containers/<username>", strict_slashes=False)
+def statss(username):
     """
     get pre defined containers and those imported by you
     """
+    print('username')
     containers = {}
     users = storage.get(User, username=username).to_dict()
     get_cont = storage.all(Container)
-    for key, value in get_cont.items():
-        print(value.to_dict()['types'])
-        if value.to_dict()['types'] is None or  value.to_dict()['user_id'] == users['id']:
-            containers[value.to_dict()['name']] = value.to_dict()
-    return jsonify(containers), 200
+    if get_cont:
+        for key, value in get_cont.items():
+            print(value.to_dict()['types'])
+            if value.to_dict()['types'] is None or value.to_dict()['user_id'] == users['id']:
+                containers[value.to_dict()['name']] = value.to_dict()
+            else:
+                abort(404)
+        print(containers)
+        return jsonify(containers), 200
+    else:
+        abort(404)
 
 
 @app_views.route('/containers/<username>/pull', strict_slashes=False, methods=['POST'])
@@ -105,6 +112,7 @@ def pull_containers(username):
     """
     pull container from Docker Hub
     """
+    print('pull')
     data = request.get_json()
     img_data = {}
 
@@ -140,3 +148,12 @@ def pull_containers(username):
             abort(404, description=f"Image '{full_image_name}' not found.")
     else:
         abort(404, description=response.text)
+
+
+#@app_views.route("/containers/<username>", strict_slashes=False)
+#def statss(username):
+#    print(username)
+#    return {
+#        "users": storage.count(User),
+#        "container": storage.count(Container)
+#    }

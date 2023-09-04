@@ -36,7 +36,6 @@ def get_all_users():
     user_list = []
     for value in all_users.values():
         user_list.append(value.to_dict())
-    print(user_list)
     return jsonify(user_list), 200
 
 
@@ -132,12 +131,14 @@ def login_user():
     """
     if request.method == 'POST':
         user = storage.get(User, username=request.form['username'])
-        print(request.form['username'])
-        print(request.form['password'])
         if user:
             user_dict = user.to_dict()
+            print(user_dict['password'])
+            print(hash_password(request.form['password'], user_dict['salt']))
             if user_dict['password'] == hash_password(request.form['password'], user_dict['salt']):
+                print('here')
                 session['user_id'] = user_dict['id']
+                session['username'] = user_dict['username']
                 return redirect(url_for('appviews.home'))
             else:
                 abort(404, description="incorrect username or password")
@@ -159,7 +160,9 @@ def logout():
 @app_views.route("/home", strict_slashes=False)
 def home():
     if 'user_id' in session:
-        return render_template('container.html')
+        id = session.get('user_id')
+        username = session.get('username')
+        return render_template('container.html', id=id, username=username)
     else:
         flash('You need to log in to access this page.', 'danger')
         return redirect(url_for('appviews.login_user'))

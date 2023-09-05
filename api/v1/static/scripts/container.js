@@ -14,7 +14,8 @@ closebtn.addEventListener('click', () => {
 });
 
 function actionOnContainer(action, id){
-
+    console.log(action)
+    console.log(id)
     const requestOptions = {
 	method: "POST",
 	headers: {
@@ -33,7 +34,8 @@ function actionOnContainer(action, id){
         return response.json();
     })
     .then(data => {
-        console.log(data)
+	    window.location.reload();
+
     })
     .catch(error => {
         console.error('Fetch error:', error);
@@ -56,9 +58,9 @@ fetch(`http://localhost:5001/api/v1/containers/${usernme}`)
 	 html+= `
                <li class="container">
                <h5>${value.name}</h5>
-               <h5 class="id">${value.container_id}</h5>
+               <h5 class="id">${value.image_id}</h5>
                <h5>${value.status}</h5>
-               <button class="start">${value.status === "stopped" ? "start" : "stop"}</button>
+               <button class="start">${value.status === "running" ? "stop" : "start"}</button>
                <button class="open">Open</button>
                </li>
                `;  
@@ -80,7 +82,13 @@ console.log(getlist)
 getlist.addEventListener("click", function(event) {
   if (event.target.classList.contains("start")) {
     const buttonText = event.target.textContent;
-   let container_id = event.target.parentElement.children[1].innerText;
+      let container_id = event.target.parentElement.children[1].innerText;
       actionOnContainer(buttonText, container_id);
+      event.stopPropagation();
+  }else if (event.target.classList.contains("stop")) {
+      const buttonText = event.target.textContent;
+      let container_id = event.target.parentElement.children[1].innerText;
+      actionOnContainer(buttonText, container_id);
+      event.stopPropagation();
   }
 });

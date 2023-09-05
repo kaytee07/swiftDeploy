@@ -13,6 +13,32 @@ closebtn.addEventListener('click', () => {
   card.style.display = 'none';
 });
 
+function actionOnContainer(action, id){
+
+    const requestOptions = {
+	method: "POST",
+	headers: {
+	    "Content-Type": "application/json",
+	}
+    };
+
+    let url = `http://localhost:5001/api/v1/containers/${action}/${id}`
+
+    
+    fetch(url, requestOptions)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log(data)
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
+    });
+}
 
 function getAllContainers(usernme) {
 fetch(`http://localhost:5001/api/v1/containers/${usernme}`)
@@ -30,10 +56,10 @@ fetch(`http://localhost:5001/api/v1/containers/${usernme}`)
 	 html+= `
                <li class="container">
                <h5>${value.name}</h5>
-               <h5>${value.container_id}</h5>
+               <h5 class="id">${value.container_id}</h5>
                <h5>${value.status}</h5>
-               <button>${value.status === "stopped" ? "start" : "stop"}</button>
-               <button>Open</button>
+               <button class="start">${value.status === "stopped" ? "start" : "stop"}</button>
+               <button class="open">Open</button>
                </li>
                `;  
 	}
@@ -48,3 +74,13 @@ fetch(`http://localhost:5001/api/v1/containers/${usernme}`)
 
 getAllContainers(username)
 
+const getlist = document.querySelector('.containers')
+const startBtn = document.querySelector("button")
+console.log(getlist)
+getlist.addEventListener("click", function(event) {
+  if (event.target.classList.contains("start")) {
+    const buttonText = event.target.textContent;
+   let container_id = event.target.parentElement.children[1].innerText;
+      actionOnContainer(buttonText, container_id);
+  }
+});

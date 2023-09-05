@@ -10,13 +10,14 @@ from api.v1.views import app_views
 from flask import abort, request, jsonify, session, redirect, url_for
 
 
-@app_views.route('/containers/start/<container_id>', strict_slashes=False, methods=['POST'])
-def start_container(container_id):
+@app_views.route('/containers/start/<image_id>', strict_slashes=False, methods=['POST'])
+def start_container(image_id):
     """
     api that starts container on server accepting app_name from user
     """
     try:
-        get_cont = storage.get(Container, container_id=container_id)
+        get_cont = storage.get(Container, image_id=image_id)
+        print(get_cont)
         get_cont_dict = get_cont.to_dict()
 
         remote_docker_host = 'http://52.87.212.95:2375'
@@ -38,12 +39,15 @@ def start_container(container_id):
             container_info = requests.get(api_url)
             if container_info.status_code == 200:
                 container = container_info.json()
+                print(container)
                 info = container['State']['Status']
                 if info == 'running':
                     get_cont.status = info
+                    get_cont.container_id = container_id
+                    get_cont.port = 3000
                     storage.new(get_cont)
                     storage.save()
-                return jsonify(container), 200
+                return jsonify(get_cont.to_dict()), 200
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
         abort(404)
@@ -52,13 +56,17 @@ def start_container(container_id):
         abort(404)
 
 
-@app_views.route('/containers/stop/<image_id>/<container_id>', strict_slashes=False, methods=['POST'])
-def stop_container(image_id, container_id):
+@app_views.route('/containers/stop/<image_id>', strict_slashes=False, methods=['POST'])
+def stop_container(image_id):
     """
     stops a specific container from running
     """
     try:
-        get_cont = storage.get(Container, container_id=image_id)
+        get_cont = storage.get(Container, image_id=image_id)
+        if get_cont:
+            container_id = get_cont.to_dict()['container_id']
+        else:
+            abort(404)
         stop_url = f"http://52.87.212.95:2375/containers/{container_id}/stop"
         stop_response = requests.post(stop_url)
         if stop_response.status_code == 204:
@@ -72,7 +80,7 @@ def stop_container(image_id, container_id):
                     get_cont.status = info
                     storage.new(get_cont)
                     storage.save()
-                return jsonify(container), 200
+                return redirect(url_for('appviews.home'))
             else:
                 abort(404)
         else:
@@ -94,6 +102,7 @@ def statss(username):
     containers = {}
     users = storage.get(User, username=username).to_dict()
     get_cont = storage.all(Container)
+    print(get_cont)
     if get_cont:
         for key, value in get_cont.items():
             print(value.to_dict()['types'])

@@ -3,21 +3,11 @@
 docker container class with it attribute
 """
 from models.base_model import BaseModel, Base
-import enum
-from sqlalchemy import Enum
 from datetime import datetime
-from sqlalchemy import Column, String, DateTime, ForeignKey
+from sqlalchemy import Column, String, Integer, ForeignKey
 from os import getenv
 
 SD_TYPE_STORAGE = getenv('SD_TYPE_STORAGE')
-
-
-class MyEnum(enum.Enum):
-    predefined = "predefined"
-    imported = "imported"
-
-    def __str__(self):
-        return self.value
 
 
 class Container(BaseModel, Base):
@@ -30,10 +20,12 @@ class Container(BaseModel, Base):
     if SD_TYPE_STORAGE == 'db':
         name = Column(String(60), nullable=False)
         status = Column(String(60), nullable=False)
-        container_id = Column(String(64), nullable=False)
+        image_id = Column(String(64), nullable=False)
         tag = Column(String(60))
-        types = Column(Enum(MyEnum))
+        types = Column(String(30))
         user_id = Column(String(60), ForeignKey('users.id'))
+        container_id = Column(String(64))
+        port = Column(Integer)
     else:
         name = None
         status = None

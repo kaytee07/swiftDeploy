@@ -13,6 +13,35 @@ closebtn.addEventListener('click', () => {
   card.style.display = 'none';
 });
 
+function checkForPort() {
+    if (localStorage.getItem("dockerurl")) {
+		const link = localStorage.getItem("dockerurl");
+
+		const myButton = document.getElementById("open");
+		const button = document.querySelector(".open");
+		const storedUser = JSON.parse(link);
+		console.log(link)
+		myButton.href = storedUser.url;
+
+		myButton.target = "_blank";
+
+		button.style.backgroundColor = "#3b37ff";
+
+		console.log(myButton)
+	      
+	    } else {
+
+		const button = document.querySelector(".open");
+
+		button.style.backgroundColor = "grey";
+		
+	    }
+}
+
+function clearLocalStorage() {
+    localStorage.removeItem("dockerurl");
+}
+
 function actionOnContainer(action, id){
     console.log(action)
     console.log(id)
@@ -33,7 +62,19 @@ function actionOnContainer(action, id){
         }
         return response.json();
     })
-    .then(data => {
+	.then(data => {
+	    console.log(data['port'])
+	    let dockerurl = {
+		url: `http://52.204.97.16/${data['port']}`
+	    }
+
+	    if (action === 'start'){
+		localStorage.setItem("dockerurl", JSON.stringify(dockerurl));
+	    }else{
+		clearLocalStorage()
+	    }
+	    checkForPort()
+	   
 	    window.location.reload();
 
     })
@@ -61,13 +102,14 @@ fetch(`http://localhost:5001/api/v1/containers/${usernme}`)
                <h5 class="id">${value.image_id}</h5>
                <h5>${value.status}</h5>
                <button class="start">${value.status === "running" ? "stop" : "start"}</button>
-               <button class="open">Open</button>
+               <a id="open" href="#"><button class="open">Open</button></a>
                </li>
                `;  
 	}
 	if (html) {
 	   containerList.innerHTML = html
 	}
+	checkForPort()
     })
     .catch(error => {
         console.error('Fetch error:', error);

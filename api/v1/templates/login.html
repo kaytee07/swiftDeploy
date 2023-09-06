@@ -31,13 +31,14 @@
             <h2>
                 Login
             </h2>
-            <form>
+            <form action="{{ url_for('appviews.login_user') }}" method="post">
                 <label for="username">username</label><br>
-                <input type="text" id="username" name="user"><br>
+                <input type="text" id="username" name="username"><br>
                 <label for="password">password</label><br>
-                <input type="text" id="password" name="pass"><br>
+                <input type="text" id="password" name="password"><br>
                 <button>Login</button>
             </form>
+	    <h4>Do you have an account? <a href="signup">Sign Up</a></h4>
         </article>
     </section>
 </body>

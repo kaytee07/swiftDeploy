@@ -10,6 +10,10 @@ from api.v1.views import app_views
 from flask import abort, request, jsonify, session, redirect, url_for
 
 
+server = "52.204.97.16"
+port = "2735"
+
+
 @app_views.route('/containers/start/<image_id>', strict_slashes=False, methods=['POST'])
 def start_container(image_id):
     """
@@ -19,7 +23,7 @@ def start_container(image_id):
         get_cont = storage.get(Container, image_id=image_id)
         get_cont_dict = get_cont.to_dict()
 
-        remote_docker_host = 'http://52.87.212.95:2375'
+        remote_docker_host = f'http://{server}:{port}'
         headers = {'Content-Type': 'application/json'}
 
         create_url = f"{remote_docker_host}/containers/create"
@@ -27,31 +31,32 @@ def start_container(image_id):
             "Image": f"{get_cont_dict['name']}:{get_cont_dict['tag']}",
             "Detach": True
         }
-        print('hello')
         response = requests.post(create_url, json=create_data, headers=headers)
         container_id = response.json()['Id']
-        print(container_id)
-        start_url = f"http://52.87.212.95:2375/containers/{container_id}/start"
+        start_url = f"http://{server}:{port}/containers/{container_id}/start"
         start_container = requests.post(start_url)
         if start_container.status_code == 204:
-            api_url = f"http://52.87.212.95:2375/containers/{container_id}/json"
+            api_url = f"http://{server}:{port}/containers/{container_id}/json"
             container_info = requests.get(api_url)
             if container_info.status_code == 200:
                 container = container_info.json()
+                for key, value in container['Config']['ExposedPorts'].items():
+                    input_string = key
+                ports = int(input_string.split('/')[0])
                 info = container['State']['Status']
                 if info == 'running':
                     get_cont.status = info
                     get_cont.container_id = container_id
-                    get_cont.port = 3000
+                    get_cont.port = ports
                     storage.new(get_cont)
                     storage.save()
                 return jsonify(get_cont.to_dict()), 200
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
-        abort(404)
+        return redirect(url_for('appviews.home'))
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-        abort(404)
+        return redirect(url_for('appviews.home'))
 
 
 @app_views.route('/containers/stop/<image_id>', strict_slashes=False, methods=['POST'])
@@ -59,19 +64,18 @@ def stop_container(image_id):
     """
     stops a specific container from running
     """
-    print('I am here')
     try:
         container_id = None
         get_cont = storage.get(Container, image_id=image_id)
         if get_cont:
             container_id = get_cont.to_dict()['container_id'][:12]
         else:
-            abort(404)
-        stop_url = f"http://52.87.212.95:2375/containers/{container_id}/stop"
+            return redirect(url_for('appviews.home'))
+        stop_url = f"http://{server}:{port}/containers/{container_id}/stop"
+        del_url = f"http://{server}:{port}/containers/prune"
         stop_response = requests.post(stop_url)
         if stop_response.status_code == 204:
-            print('did it hit')
-            api_url = f"http://52.87.212.95:2375/containers/{container_id}/json"
+            api_url = f"http://{server}:{port}/containers/{container_id}/json"
             container_info = requests.get(api_url)
             if container_info.status_code == 200:
                 container = container_info.json()
@@ -80,17 +84,18 @@ def stop_container(image_id):
                     get_cont.status = info
                     storage.new(get_cont)
                     storage.save()
+                    requests.post(del_url)
                 return jsonify(get_cont.to_dict()), 200
             else:
-                abort(404)
+                return redirect(url_for('appviews.home'))
         else:
-            abort(404)
+            return redirect(url_for('appviews.home'))
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
-        abort(404)
+        return redirect(url_for('appviews.home'))
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-        abort(404)
+        return redirect(url_for('appviews.home'))
 
 
 @app_views.route("/containers/<username>", strict_slashes=False)
@@ -99,17 +104,19 @@ def statss(username):
     get pre defined containers and those imported by you
     """
     containers = {}
-    users = storage.get(User, username=username).to_dict()
+    users = storage.get(User, username=username)
+    if users:
+        user_dict = users.to_dict()
     get_cont = storage.all(Container)
-    if get_cont:
+    if get_cont is not None:
         for key, value in get_cont.items():
-            if value.to_dict()['types'] is None or value.to_dict()['user_id'] == users['id']:
+            if value.to_dict()['types'] is None or value.to_dict()['user_id'] == user_dict['id']:
                 containers[value.to_dict()['name']] = value.to_dict()
             else:
                 continue
         return jsonify(containers), 200
     else:
-        abort(404)
+        return redirect(url_for('appviews.home'))
 
 
 @app_views.route('/containers/<username>/pull', strict_slashes=False, methods=['POST'])
@@ -126,12 +133,13 @@ def pull_containers(username):
     else:
         full_image_name = f"{data['name']}:latest"
 
-    api_url = f'http://52.87.212.95:2375/images/create?fromImage={full_image_name}'
+    api_url = f'http://{server}:{port}/images/create?fromImage={full_image_name}'
+    print('api')
     print(api_url)
     response = requests.post(api_url)
 
     if response.status_code == 200:
-        api_url = 'http://52.87.212.95:2375/images/json'
+        api_url = f'http://{server}:{port}/images/json'
         response = requests.get(api_url)
 
         if response.status_code == 200:
@@ -151,15 +159,6 @@ def pull_containers(username):
                     storage.save()
                     return redirect(url_for('appviews.home'))
 
-            abort(404, description=f"Image '{full_image_name}' not found.")
+            return redirect(url_for('appviews.home'))
     else:
-        abort(404, description=response.text)
-
-
-#@app_views.route("/containers/<username>", strict_slashes=False)
-#def statss(username):
-#    print(username)
-#    return {
-#        "users": storage.count(User),
-#        "container": storage.count(Container)
-#    }
+        return redirect(url_for('appviews.home'))

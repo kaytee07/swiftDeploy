@@ -138,9 +138,9 @@ def login_user():
                 session['username'] = user_dict['username']
                 return redirect(url_for('appviews.home'))
             else:
-                abort(404, description="incorrect username or password")
+                return redirect(url_for('appviews.home'))
         else:
-            abort(404, description="User not found")
+            return redirect(url_for('appviews.home'))
     else:
         return render_template('login.html')
 

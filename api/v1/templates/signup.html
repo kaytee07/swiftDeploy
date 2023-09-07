@@ -22,9 +22,7 @@
                 Start your docker container with one click
             </h2>
             <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Deserunt, deleniti? Nostrum, sint aliquid!
-                Ratione cumque sed quos, soluta animi libero quaerat, accusantium molestiae perferendis, mollitia ex
-                aliquam iste eligendi voluptatibus.
+                In the past, hosting meant dealing with complicated setups and long waiting times. But in Decker, we've harnessed the power of instant gratification. Launch containers on demand and watch your ideas come to life in seconds. No more waiting around - your creativity knows no bounds!
             </p>
         </article>
     </aside>
@@ -36,16 +34,16 @@
             <form action="{{ url_for('appviews.create_user') }}" method="post">
                 <div class="names">
                     <label for="firstname">first name</label><br>
-                    <input type="text" id="firstname" name="user"><br>
+                    <input type="text" id="firstname" name="first_name"><br>
                     <label for="lastname">last name</label><br>
-                    <input type="text" id="lastname" name="pass"><br>
+                    <input type="text" id="lastname" name="last_name"><br>
                 </div>
                 <label for="username">username</label><br>
-                <input type="text" id="username" name="user"><br>
+                <input type="text" id="username" name="username"><br>
                 <label for="email">email</label><br>
-                <input type="email" id="email" name="user"><br>
+                <input type="email" id="email" name="email"><br>
                 <label for="password">password</label><br>
-                <input type="password" id="password" name="pass"><br>
+                <input type="password" id="password" name="password"><br>
                 <button>Sign Up</button>
             </form>
         </article>

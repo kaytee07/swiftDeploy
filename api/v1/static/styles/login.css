@@ -1,0 +1,91 @@
+body {
+    display: flex;
+    justify-content:space-between;
+}
+
+aside.side {
+    height: 87vh;
+    width: 28vw;
+    background-color: #3b37ff;
+    color: white;
+    border-radius: 2%;
+    padding: 3%;
+}
+
+section {
+    height: 90vh;
+    width: 58vw;
+    font-family: 'Roboto', sans-serif;
+}
+
+aside.side article {
+    font-family: 'Roboto', sans-serif;
+    margin-top: 92px;
+}
+
+aside.side header h4 {
+font-family: 'Stardos Stencil', cursive;
+}
+
+section article {
+    margin-top: 49px;
+}
+
+section article form {
+    margin-top: 94px;
+}
+
+form input {
+    height: 32px;
+    width: 287px;
+    margin: 10px 0px;
+    border-radius: 5px;
+    border: 2px solid;
+    border-color: #e5e8f0;
+}
+
+form button {
+    color: white;
+    background-color: #3b37ff;
+    border: none;
+    height: 40px;
+    width: 163px;
+    border-radius: 5px;
+    margin: 10px 0px;
+}
+
+@media screen and (max-width: 768px) {
+
+    body {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    }
+
+    aside.side {
+    height: 64px;
+    width: 90vw;
+    background-color: #3b37ff;
+    color: white;
+    border-radius: 2%;
+    padding: 3%;
+    }
+
+    aside.side article h2 {
+        display: none;
+    }
+
+    aside.side article p {
+        display: none;
+    }
+
+    section {
+    display: flex;
+    justify-content: center;
+    height: 90vh;
+    width: 94vw;
+    font-family: 'Roboto', sans-serif;
+    }
+
+
+}

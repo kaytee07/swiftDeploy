@@ -163,3 +163,8 @@ def home():
     else:
         flash('You need to log in to access this page.', 'danger')
         return redirect(url_for('appviews.login_user'))
+
+
+@app_views.route("/", strict_slashes=False)
+def landing_page():
+    return render_template('landing.html')

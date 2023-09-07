@@ -1,0 +1,146 @@
+body,
+html {
+    margin: 0;
+    padding: 0;
+}
+
+#landing {
+    background: url("https://plus.unsplash.com/premium_photo-1661962566554-ed080bebffc4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1631&q=80") no-repeat center fixed;
+    background-size: cover;
+    height: 100vh;
+    position: relative;
+}
+
+section#landing div.image {
+    height: 100vh;
+        position: absolute;
+        width: 98vw;
+        background-color: rgba(0, 0, 0, 0.8);
+}
+
+div.image header {
+        color: white;
+        display: flex;
+        justify-content: space-between;
+}
+
+header div.nav {
+    width: 250px;
+    display: flex;
+    justify-content: space-evenly;
+    
+}
+
+div.nav button.getting-started {
+    margin: 22px 0;
+    background-color: transparent;
+        color: white;
+        border: 1px solid;
+        height: 32px;
+}
+
+header div.logo {
+    margin: 22px 0;
+    margin-left: 15px;
+    font-family: 'Stardos Stencil', cursive;
+    font-size: 20px;
+}
+
+div.image div.article {
+    margin-top: 350px;
+    margin-left: 20px;
+}
+
+h4.short {
+    font-size: xx-large;
+    color: white;
+    font-family: 'Roboto Slab', serif;
+}
+
+div.nav h3 {
+    margin-top: 26px;
+}
+
+button.started {
+    margin: 22px 0;
+    background-color: transparent;
+    color: white;
+    border: 1px solid;
+    height: 36px;
+    width: 153px;
+}
+
+h2.features {
+    text-align: center;
+    margin: 0px 0px;
+    font-family: 'Roboto', sans-serif;
+    color: white;
+}
+
+div.all_cards{
+    display: flex;
+    justify-content: space-around;
+}
+
+div.feat img {
+    height: 226px;
+    width: 336px;
+}
+
+div.all-cards {
+    display: flex;
+    justify-content: space-evenly;
+    height: 380px;
+    margin-top: 30px;
+}
+
+section#features {
+    background-color: #0d313f;
+    padding-top: 30px;
+}
+
+div.feat h4 {
+    text-align: center;
+    font-family: 'Roboto Slab', serif;
+    color: white;
+}
+
+section#about-work {
+    height: 400px;
+    background-color: cadetblue;
+    padding: 20px;
+}
+
+div.about-card img {
+    height: 300px;
+    margin-right: 29px
+}
+
+div.about-card {
+    margin-top: 30px;
+    display: flex;
+    font-family: 'Roboto Slab', serif;
+    color: white;
+}
+
+div.links {
+    display: flex;
+    color: white;
+    justify-content: revert;
+}
+
+div.links div {
+    display: flex;
+}
+
+svg {
+    margin: 24px;
+}
+
+a.links{
+    text-decoration: none;
+}
+
+a {
+    text-decoration: none;
+}

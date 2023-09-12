@@ -49,7 +49,8 @@ function actionOnContainer(action, id){
 	method: "POST",
 	headers: {
 	    "Content-Type": "application/json",
-	}
+	},
+	mode: 'no-cors',
     };
 
     let url = `http://localhost:5001/api/v1/containers/${action}/${id}`
@@ -65,7 +66,7 @@ function actionOnContainer(action, id){
 	.then(data => {
 	    console.log(data['port'])
 	    let dockerurl = {
-		url: `http://52.204.97.16/${data['port']}`
+		url: `http://52.204.97.16:${data['port']}`
 	    }
 
 	    if (action === 'start'){
@@ -84,7 +85,10 @@ function actionOnContainer(action, id){
 }
 
 function getAllContainers(usernme) {
-fetch(`http://localhost:5001/api/v1/containers/${usernme}`)
+    fetch(`http://localhost:5001/api/v1/containers/${usernme}`, {
+	method: 'GET',
+	mode: 'no-cors',
+    })
     .then(response => {
         if (!response.ok) {
             throw new Error('Network response was not ok');

@@ -10,8 +10,10 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 app.register_blueprint(app_views, url_prefix='/api/v1')
-CORS(app)
-cors = CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
+
+CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
+
+CORS(app, origins="https://kaytee07.pythonanywhere.com")
 
 session_key = getenv('SD_SESSION_KEY')
 

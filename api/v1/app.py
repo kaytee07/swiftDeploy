@@ -8,8 +8,9 @@ from api.v1.views import app_views
 from flask import Flask
 from flask_cors import CORS
 
-app = Flask(__name__, static_url_path='/static', static_folder='static')
+app = Flask(__name__)
 app.register_blueprint(app_views, url_prefix='/api/v1')
+CORS(app)
 cors = CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 
 session_key = getenv('SD_SESSION_KEY')

@@ -18,6 +18,8 @@ With SwiftDeploy, users can effortlessly access a vast library of container imag
 SwiftDeploy enables users to start containers on demand, streamlining the process of running applications within isolated environments. This promotes efficiency and optimal resource utilization.
 
 ## Configuration Options
+Before running SwiftDeploy, you need to set up the following environment variables. Create a .env file in the project directory and populate it with the variables and their respective values as shown below. Replace the placeholder values with your actual configuration.
+
 ```
 SD_MYSQL_USER='user'               # MySQL database user
 SD_MYSQL_PWD='password'            # MySQL database password

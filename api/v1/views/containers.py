@@ -33,23 +33,32 @@ def start_container(image_id):
         }
         response = requests.post(create_url, json=create_data, headers=headers)
         container_id = response.json()['Id']
+        print(container_id)
         start_url = f"http://{server}:{port}/containers/{container_id}/start"
         start_container = requests.post(start_url)
+        print(start_container.status_code)
         if start_container.status_code == 204:
             api_url = f"http://{server}:{port}/containers/{container_id}/json"
             container_info = requests.get(api_url)
+            print(container_info.status_code)
             if container_info.status_code == 200:
                 container = container_info.json()
-                for key, value in container['Config']['ExposedPorts'].items():
-                    input_string = key
-                ports = int(input_string.split('/')[0])
+                print(container['Config'])
+                if 'ExposedPorts' in container['Config']:
+                    for key, value in container['Config']['ExposedPorts'].items():
+                        input_string = key
+                        ports = int(input_string.split('/')[0])
                 info = container['State']['Status']
+                print(info)
                 if info == 'running':
                     get_cont.status = info
                     get_cont.container_id = container_id
-                    get_cont.port = ports
+                    if 'ExposedPorts' in container['Config']:
+                        print('car')
+                        get_cont.port = ports
                     storage.new(get_cont)
                     storage.save()
+                    print(get_cont.to_dict())
                 return jsonify(get_cont.to_dict()), 200
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")

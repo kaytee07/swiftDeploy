@@ -31,6 +31,13 @@ header div.nav {
     
 }
 
+div.feat p {
+   color: white;
+    font-family: 'Roboto Slab', serif;
+    font-size: 13px;
+    max-width: 317px;
+}
+
 div.nav button.getting-started {
     margin: 22px 0;
     background-color: transparent;
@@ -59,6 +66,8 @@ h4.short {
 
 div.nav h3 {
     margin-top: 26px;
+    color: white;
+    cursor: pointer;
 }
 
 button.started {
@@ -131,6 +140,7 @@ div.links {
 
 div.links div {
     display: flex;
+    color: white;
 }
 
 svg {
@@ -143,4 +153,48 @@ a.links{
 
 a {
     text-decoration: none;
+}
+
+/* Media query for phone view */
+@media screen and (max-width: 768px) {
+    div.all-cards {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+        height: 1050px;
+        margin-top: 30px;
+    }
+
+    div.about-card {
+        flex-direction: column;
+        margin-top: 30px;
+        display: flex;
+        font-family: 'Roboto Slab', serif;
+        color: white;
+    }
+
+    section#features {
+        background-color: #0d313f;
+        padding-top: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+	height: 1156px;
+    }
+
+    div.about-card img {
+        height: 300px;
+        width: 363px;
+        margin: 0px;
+    }
+
+    section#about-work {
+        height: 690px;
+        background-color: cadetblue;
+        padding: 20px;
+    }
+
+    div svg {
+	margin: 24px 20px;
+    }
 }

@@ -12,6 +12,9 @@ import os
 
 
 def hash_password(password, salt=None):
+    """
+    hash user password
+    """
     rounds = 100000
     hash_algo = hashlib.sha256()
 
@@ -65,6 +68,9 @@ def delete_user(user_id):
 
 @app_views.route("/signup", methods=['POST', 'GET'], strict_slashes=False)
 def create_user():
+    """
+    create new user
+    """
     if request.method == 'POST':
         data = {}
         form_data = request.form
@@ -156,6 +162,10 @@ def logout():
 
 @app_views.route("/home", strict_slashes=False)
 def home():
+    """
+    on user login direct user to home screen with user's username and id 
+    or redirect to login screen if login detailsare inaccurate
+    """
     if 'user_id' in session:
         id = session.get('user_id')
         username = session.get('username')
@@ -167,4 +177,7 @@ def home():
 
 @app_views.route("/", strict_slashes=False)
 def landing_page():
+    """
+    direct user to the landing page
+    """
     return render_template('landing.html')
